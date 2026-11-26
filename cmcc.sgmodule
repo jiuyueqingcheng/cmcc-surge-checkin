@@ -2,8 +2,8 @@
 #!desc=中国移动 App「签到有礼」每日自动签到 + 累计/连签奖励自动领取。凭证用抓包获取（见 README.md）。
 #!author=Muse
 #!homepage=https://wx.10086.cn
-#!arguments=checkin_hour:9,checkin_minute:0,keepalive:true,capture:true
-#!arguments-desc=签到时间：checkin_hour（0-23，默认 9）和 checkin_minute（0-59，默认 0）。keepalive：每小时保活一次，重置 app_token 的 2 小时过期计时（默认开）。capture：抓包开关（默认开）。凭证不用在这里填：打开 App 签到页时由抓包脚本自动抓取并保存；抓不到时把 appTokenLogin 请求体 JSON 粘贴到 BoxJS（键 cmcc_account）。
+#!arguments=checkin_hour:9,checkin_minute:0,keepalive:true,capture:true,policy:DIRECT
+#!arguments-desc=签到时间：checkin_hour（0-23，默认 9）和 checkin_minute（0-59，默认 0）。keepalive：每小时保活一次，重置 app_token 的 2 小时过期计时（默认开）。capture：抓包开关（默认开）。policy：请求出站策略（默认 DIRECT 直连）。直连到 wx.10086.cn 超时/挂起时，把它改成你的代理策略组名（如 VPS 节点组），请求改走代理。凭证不用在这里填：打开 App 签到页时由抓包脚本自动抓取并保存；抓不到时把 appTokenLogin 请求体 JSON 粘贴到 BoxJS（键 cmcc_account）。
 
 # 使用前必读（见 README.md）：
 # 1. 脚本地址已指向本仓库的 cmcc.js / cmcc-capture.js：
@@ -22,8 +22,8 @@
 # 旧版 Surge 会忽略 #!arguments，那时请改用 BoxJS（键 cmcc_account）。
 
 [Script]
-中国移动签到 = type=cron,cronexp="{{{checkin_minute}}} {{{checkin_hour}}} * * *",timeout=60,script-path=https://cdn.jsdelivr.net/gh/JiuYueQingCheng/cmcc-surge-checkin@main/cmcc.js,argument=mode=checkin
-中国移动保活 = type=cron,cronexp="0 * * * *",timeout=60,script-path=https://cdn.jsdelivr.net/gh/JiuYueQingCheng/cmcc-surge-checkin@main/cmcc.js,argument=mode=keepalive&keepalive={{{keepalive}}}
+中国移动签到 = type=cron,cronexp="{{{checkin_minute}}} {{{checkin_hour}}} * * *",timeout=60,script-path=https://cdn.jsdelivr.net/gh/JiuYueQingCheng/cmcc-surge-checkin@main/cmcc.js,argument=mode=checkin&policy={{{policy}}}
+中国移动保活 = type=cron,cronexp="0 * * * *",timeout=60,script-path=https://cdn.jsdelivr.net/gh/JiuYueQingCheng/cmcc-surge-checkin@main/cmcc.js,argument=mode=keepalive&keepalive={{{keepalive}}}&policy={{{policy}}}
 中国移动凭证抓取 = type=http-request,pattern=^https://wx\.10086\.cn/qwhdsso/appTokenLogin,script-path=https://cdn.jsdelivr.net/gh/JiuYueQingCheng/cmcc-surge-checkin@main/cmcc-capture.js,argument=capture={{{capture}}},requires-body=true
 
 [MITM]

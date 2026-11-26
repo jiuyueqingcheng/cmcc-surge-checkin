@@ -69,12 +69,13 @@ App 若做证书 pinning，Surge 的 MITM 抓不到请求体。此时：
 | `checkin_minute` | 0 | 每天签到分钟（0-59） |
 | `keepalive` | true | 每小时保活开关。关闭后 app_token 会在 2 小时后过期，次日签到将失败 |
 | `capture` | true | 自动抓包开关 |
+| `policy` | DIRECT | 请求出站策略。iPhone 上脚本请求默认直连；直连到 wx.10086.cn 超时/挂起时，把它改成你的代理策略组名（如 VPS 节点组），请求改走代理 |
 
 凭证不放在模块参数里（Surge 不接受空默认值的参数声明）：自动抓取成功时不用填；手动抓包后粘贴到 BoxJS（键 `cmcc_account`）。
 
 ## 多账号
 
-BoxJS 里填 `cmcc_accounts`，值为 JSON 数组（每个元素是一份 appTokenLogin 请求体 JSON）；或在模块参数 `account` 里粘贴 JSON 数组。多个账号依次签到，通知里按手机尾号区分。
+BoxJS 里填 `cmcc_accounts`，值为 JSON 数组（每个元素是一份 appTokenLogin 请求体 JSON）。多个账号依次签到，通知里按手机尾号区分。
 
 ## 接口说明
 

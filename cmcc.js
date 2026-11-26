@@ -15,9 +15,12 @@
 //   cmcc-capture.js              http-request：打开 App 签到页时自动抓取 appTokenLogin 请求体
 //   cmcc.sgmodule                模块（含两种定时任务 + 抓包脚本 + MITM）
 // 注意：App 可能做证书 pinning，抓包脚本抓不到时请用 Stream/Proxyman 手动抓包，
-//   把 appTokenLogin 请求体 JSON 粘贴到模块参数 account 或 BoxJS。
+//   把 appTokenLogin 请求体 JSON 粘贴到 BoxJS（键 cmcc_account）。
+// 出站策略：iPhone 上 $httpClient 默认直连，wx.10086.cn 直连挂起时，
+//   把模块参数 policy 设为你的代理策略组名，请求改走代理（已验证 VPS 能直通该站）。
+// 单个请求超时 30s（$httpClient 默认 5s 太短），避免挂起拖到脚本超时。
 
-const SCRIPT_VERSION = "2026-11-26.r1";
+const SCRIPT_VERSION = "2026-11-26.r2";
 const ENV_NAME = "中国移动";
 const STATUS_KEY = "cmcc_status";
 const REGISTRY_KEY = "checkin_registry";
@@ -30,6 +33,12 @@ const USER_AGENT =
   "leadeon/12.5.2/CMCCIT";
 const DEFAULT_ACTIVITY_ID = "1021122301";
 const DEFAULT_CHANNEL_ID = "P00000109876";
+// 单个 HTTP 请求超时（秒）。$httpClient 默认 5s，wx.10086.cn 直连经常超过 5s
+// 或直接挂起，设 30s 让它有足够时间完成，挂起时也能快速失败而不是拖到脚本超时。
+var HTTP_TIMEOUT = 30;
+// $httpClient 出站策略：空 = 默认（iPhone 上为直连）。直连到 wx.10086.cn 挂起时，
+// 把模块参数 policy 设为你的代理策略组名（如 VPS 节点组），请求改走代理。
+var HTTP_POLICY = "";
 
 // ------------------------------------------------------------ Env 兼容层
 function Env(name) {
@@ -69,7 +78,9 @@ Env.prototype.get = function (url, opts) {
   var self = this;
   return new Promise(function (resolve, reject) {
     if (self.isSurge || self.isLoon) {
-      $httpClient.get(url, opts || {}, function (error, response, data) {
+      var o = Object.assign({ timeout: HTTP_TIMEOUT }, opts || {});
+      if (HTTP_POLICY) o.policy = HTTP_POLICY;
+      $httpClient.get(url, o, function (error, response, data) {
         if (error) reject(error);
         else resolve({ status: response.status, headers: response.headers || {}, body: data });
       });
@@ -94,7 +105,8 @@ Env.prototype.post = function (url, body, opts) {
   var self = this;
   return new Promise(function (resolve, reject) {
     if (self.isSurge || self.isLoon) {
-      var o = Object.assign({ headers: { "Content-Type": "application/json;charset=UTF-8" }, body: body }, opts || {});
+      var o = Object.assign({ headers: { "Content-Type": "application/json;charset=UTF-8" }, body: body, timeout: HTTP_TIMEOUT }, opts || {});
+      if (HTTP_POLICY) o.policy = HTTP_POLICY;
       $httpClient.post(url, o, function (error, response, data) {
         if (error) reject(error);
         else resolve({ status: response.status, headers: response.headers || {}, body: data });
@@ -288,6 +300,7 @@ function apiHeaders(referer, sessionCookie) {
 // ------------------------------------------------------------ SSO 换会话
 async function exchangeSession(acc) {
   var actUrl = BASE + "/qwhdhub/qwhdmark/" + acc.activity_id + "?channelId=" + acc.channel_id;
+  $.log("[" + phoneTag(acc.phone) + "] 请求登录页（超时 " + HTTP_TIMEOUT + "s，策略 " + (HTTP_POLICY || "默认直连") + "）");
   // ① 登录中转页，提取一次性 sid
   var loginResp = await $.get(SSO_LOGIN + "?dlwmh=true&actUrl=" + encodeURIComponent(actUrl), {
     headers: { "user-agent": USER_AGENT, "accept-language": "zh-CN,zh-Hans;q=0.9" }
@@ -518,6 +531,10 @@ function saveStatus(today, ok, detail) {
 
 async function main() {
   var arg = parseArgument();
+  // 出站策略：模块参数 policy（策略组名）。留空 = 默认直连；直连到 wx.10086.cn 挂起时
+  // 填你的代理策略组名（如 VPS 节点组），请求改走代理。
+  if (arg.policy && String(arg.policy).trim()) HTTP_POLICY = String(arg.policy).trim();
+  if (arg.timeout && Number(arg.timeout) > 0) HTTP_TIMEOUT = Number(arg.timeout);
   var mode = String(arg.mode || arg.run || "checkin").toLowerCase();
   if (mode !== "keepalive" && mode !== "checkin") mode = "checkin";
   // 保活开关：模块参数 keepalive=false 时，每小时的保活任务直接跳过
