@@ -2,8 +2,8 @@
 #!desc=中国移动 App「签到有礼」每日自动签到 + 累计/连签奖励自动领取。凭证用抓包获取（见 README.md）。
 #!author=Muse
 #!homepage=https://wx.10086.cn
-#!arguments=account,checkin_hour:9,checkin_minute:0,keepalive:true,capture:true
-#!arguments-desc=凭证：打开 App 签到页时由抓包脚本自动抓取并保存，不用填。抓不到时把 appTokenLogin 请求体 JSON 粘贴到 account（JSON 里若含 & 请改用 BoxJS）。签到时间：checkin_hour（0-23，默认 9）和 checkin_minute（0-59，默认 0）。keepalive：每小时保活一次，重置 app_token 的 2 小时过期计时（默认开）。capture：抓包开关（默认开）。
+#!arguments=account:,checkin_hour:9,checkin_minute:0,keepalive:true,capture:true
+#!arguments-desc=凭证 account：可留空，打开 App 签到页时由抓包脚本自动抓取并保存。抓不到时把 appTokenLogin 请求体 JSON 粘贴到 account（JSON 里若含 & 请改用 BoxJS）。签到时间：checkin_hour（0-23，默认 9）和 checkin_minute（0-59，默认 0）。keepalive：每小时保活一次，重置 app_token 的 2 小时过期计时（默认开）。capture：抓包开关（默认开）。
 
 # 使用前必读（见 README.md）：
 # 1. 脚本地址已指向本仓库的 cmcc.js / cmcc-capture.js：

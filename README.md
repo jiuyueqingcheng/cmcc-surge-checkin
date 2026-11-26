@@ -65,7 +65,7 @@ App 若做证书 pinning，Surge 的 MITM 抓不到请求体。此时：
 
 | 参数 | 默认 | 说明 |
 |---|---|---|
-| `account` | （空） | 手动抓包的 appTokenLogin 请求体 JSON。自动抓取成功时不用填。JSON 里若含 `&` 请改用 BoxJS（键 `cmcc_account`） |
+| `account` | （空，可留空） | 手动抓包的 appTokenLogin 请求体 JSON。自动抓取成功时不用填。JSON 里若含 `&` 请改用 BoxJS（键 `cmcc_account`） |
 | `checkin_hour` | 9 | 每天签到小时（0-23） |
 | `checkin_minute` | 0 | 每天签到分钟（0-59） |
 | `keepalive` | true | 每小时保活开关。关闭后 app_token 会在 2 小时后过期，次日签到将失败 |
