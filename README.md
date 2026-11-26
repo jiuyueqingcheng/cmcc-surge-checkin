@@ -35,7 +35,7 @@ App 若做证书 pinning，Surge 的 MITM 抓不到请求体。此时：
 1. 手机装抓包工具（iOS 用 Stream，电脑用 Proxyman / Charles），对 App 开启 HTTPS 抓包。
 2. 打开中国移动 App → 我的 → 「签到有礼」，进入签到页。
 3. 在抓包记录中找到 `wx.10086.cn/qwhdsso/appTokenLogin` 这条 POST 请求。
-4. 复制请求体里的完整 JSON，粘贴到模块参数 `account` 里；或粘贴到 BoxJS（键 `cmcc_account`）。
+4. 复制请求体里的完整 JSON，粘贴到 BoxJS（键 `cmcc_account`）。
 
 请求体示例（仅作格式参考，不要用这份）：
 
@@ -65,11 +65,12 @@ App 若做证书 pinning，Surge 的 MITM 抓不到请求体。此时：
 
 | 参数 | 默认 | 说明 |
 |---|---|---|
-| `account` | （空，可留空） | 手动抓包的 appTokenLogin 请求体 JSON。自动抓取成功时不用填。JSON 里若含 `&` 请改用 BoxJS（键 `cmcc_account`） |
 | `checkin_hour` | 9 | 每天签到小时（0-23） |
 | `checkin_minute` | 0 | 每天签到分钟（0-59） |
 | `keepalive` | true | 每小时保活开关。关闭后 app_token 会在 2 小时后过期，次日签到将失败 |
 | `capture` | true | 自动抓包开关 |
+
+凭证不放在模块参数里（Surge 不接受空默认值的参数声明）：自动抓取成功时不用填；手动抓包后粘贴到 BoxJS（键 `cmcc_account`）。
 
 ## 多账号
 
